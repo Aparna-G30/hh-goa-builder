@@ -1,20 +1,39 @@
+import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 export default function UploadBox({ builder, setBuilder }) {
-  const onDrop = (acceptedFiles) => {
-    const file = acceptedFiles[0];
+  const [uploadError, setUploadError] = useState("");
 
+  const onDrop = (acceptedFiles, fileRejections) => {
+    setUploadError("");
+
+    if (fileRejections?.length) {
+      setUploadError("That file type isn't supported. Please use JPG or PNG.");
+      return;
+    }
+
+    const file = acceptedFiles[0];
     if (!file) return;
+
+    if (file.type === "image/heic" || file.type === "image/heif" || /\.heic$/i.test(file.name || "")) {
+      setUploadError(
+        "HEIC photos can look broken in some browsers — JPG or PNG is recommended."
+      );
+    }
 
     setBuilder((prev) => ({
       ...prev,
       image: URL.createObjectURL(file),
+      imageFile: file,
     }));
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      "image/*": [],
+      "image/jpeg": [],
+      "image/png": [],
+      "image/heic": [],
+      "image/heif": [],
     },
     multiple: false,
     onDrop,
@@ -60,6 +79,12 @@ export default function UploadBox({ builder, setBuilder }) {
           </>
         )}
       </div>
+
+      {uploadError && (
+        <p className="mt-2 text-xs font-semibold text-[#FF6B4A]">
+          {uploadError}
+        </p>
+      )}
     </div>
   );
 }

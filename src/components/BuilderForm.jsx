@@ -1,9 +1,31 @@
 import UploadBox from "./UploadBox";
+import { builderTitles } from "../constants/titles";
 
-export default function BuilderForm({ builder, setBuilder }) {
+function fieldClass(hasError, focusColorClass) {
+  return `w-full rounded-2xl border-2 bg-white px-4 py-3.5 font-semibold text-[#111111] placeholder:text-[#111111]/30 outline-none transition focus:ring-4 ${
+    hasError
+      ? "border-[#FF6B4A] focus:border-[#FF6B4A] focus:ring-[#FF6B4A]/20"
+      : `border-[#063B2A]/20 ${focusColorClass}`
+  }`;
+}
+
+export default function BuilderForm({ builder, setBuilder, fieldErrors = {} }) {
+  const shuffleTitle = () => {
+    const options = builderTitles.filter((t) => t !== builder?.title);
+    const next = options[Math.floor(Math.random() * options.length)] || builderTitles[0];
+    setBuilder((prev) => ({ ...prev, title: next }));
+  };
+
   return (
     <div className="space-y-6">
-      <UploadBox builder={builder} setBuilder={setBuilder} />
+      <div>
+        <UploadBox builder={builder} setBuilder={setBuilder} />
+        {fieldErrors.image && (
+          <p className="mt-2 text-xs font-semibold text-[#FF6B4A]">
+            {fieldErrors.image}
+          </p>
+        )}
+      </div>
 
       <div>
         <label
@@ -23,8 +45,13 @@ export default function BuilderForm({ builder, setBuilder }) {
               name: e.target.value,
             }))
           }
-          className="w-full rounded-2xl border-2 border-[#063B2A]/20 bg-white px-4 py-3.5 font-semibold text-[#111111] placeholder:text-[#111111]/30 outline-none transition focus:border-[#FF3B8D] focus:ring-4 focus:ring-[#FF3B8D]/20"
+          className={fieldClass(!!fieldErrors.name, "focus:border-[#FF3B8D] focus:ring-[#FF3B8D]/20")}
         />
+        {fieldErrors.name && (
+          <p className="mt-2 text-xs font-semibold text-[#FF6B4A]">
+            {fieldErrors.name}
+          </p>
+        )}
       </div>
 
       <div>
@@ -45,8 +72,13 @@ export default function BuilderForm({ builder, setBuilder }) {
               role: e.target.value,
             }))
           }
-          className="w-full rounded-2xl border-2 border-[#063B2A]/20 bg-white px-4 py-3.5 font-semibold text-[#111111] placeholder:text-[#111111]/30 outline-none transition focus:border-[#FFD83D] focus:ring-4 focus:ring-[#FFD83D]/30"
+          className={fieldClass(!!fieldErrors.role, "focus:border-[#FFD83D] focus:ring-[#FFD83D]/30")}
         />
+        {fieldErrors.role && (
+          <p className="mt-2 text-xs font-semibold text-[#FF6B4A]">
+            {fieldErrors.role}
+          </p>
+        )}
       </div>
 
       <div>
@@ -67,8 +99,55 @@ export default function BuilderForm({ builder, setBuilder }) {
               techStack: e.target.value,
             }))
           }
-          className="w-full rounded-2xl border-2 border-[#063B2A]/20 bg-white px-4 py-3.5 font-semibold text-[#111111] placeholder:text-[#111111]/30 outline-none transition focus:border-[#55D6FF] focus:ring-4 focus:ring-[#55D6FF]/30"
+          className={fieldClass(!!fieldErrors.techStack, "focus:border-[#55D6FF] focus:ring-[#55D6FF]/30")}
         />
+        {fieldErrors.techStack && (
+          <p className="mt-2 text-xs font-semibold text-[#FF6B4A]">
+            {fieldErrors.techStack}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="builder-title"
+          className="mb-2 block text-xs font-black uppercase tracking-widest text-[#087F4F]"
+        >
+          Builder Title
+        </label>
+        <div className="flex gap-2">
+          <select
+            id="builder-title"
+            value={builder?.title || ""}
+            onChange={(e) =>
+              setBuilder((prev) => ({
+                ...prev,
+                title: e.target.value,
+              }))
+            }
+            className={fieldClass(!!fieldErrors.title, "focus:border-[#B7F000] focus:ring-[#B7F000]/30")}
+          >
+            {builderTitles.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={shuffleTitle}
+            aria-label="Shuffle builder title"
+            title="Shuffle builder title"
+            className="sticker shrink-0 rounded-2xl bg-[#111111] px-4 text-lg text-[#B7F000] transition hover:-translate-y-0.5 active:translate-y-0"
+          >
+            🎲
+          </button>
+        </div>
+        {fieldErrors.title && (
+          <p className="mt-2 text-xs font-semibold text-[#FF6B4A]">
+            {fieldErrors.title}
+          </p>
+        )}
       </div>
     </div>
   );

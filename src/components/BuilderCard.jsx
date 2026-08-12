@@ -1,8 +1,10 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 
-export default function BuilderCard({ builder }) {
+const BuilderCard = forwardRef(function BuilderCard({ builder }, ref) {
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 20, rotate: -2 }}
       animate={{ opacity: 1, y: 0, rotate: -2 }}
       whileHover={{ rotate: 0, scale: 1.02 }}
@@ -77,4 +79,6 @@ export default function BuilderCard({ builder }) {
       </div>
     </motion.div>
   );
-}
+});
+
+export default BuilderCard;
