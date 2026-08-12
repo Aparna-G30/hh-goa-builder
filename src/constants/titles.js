@@ -1,0 +1,18 @@
+export const builderTitles = [
+  "API Alchemist",
+  "Merge Conflict Survivor",
+  "Bug Exorcist",
+  "Midnight Deployer",
+  "Stack Architect",
+  "Code Whisperer",
+  "Latency Hunter",
+  "Pixel Perfectionist",
+  "Prompt Engineer",
+  "Full Stack Wizard",
+  "Ship It Specialist",
+  "The Debugger",
+  "Coffee Powered Coder",
+  "React Ranger",
+  "FastAPI Ninja",
+  "Open Source Explorer",
+];

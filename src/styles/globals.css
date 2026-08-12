@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root{
+  /* Tropical palette */
+  --deep-jungle:#063B2A;
+  --jungle:#087F4F;
+  --bright-green:#39D353;
+  --lime:#B7F000;
+  --sun:#FFD83D;
+  --cream:#FFF4D6;
+  --pink:#FF3B8D;
+  --coral:#FF6B4A;
+  --sky:#55D6FF;
+  --ink:#111111;
+
+  --bg: var(--cream);
+  --text: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.font-display {
+  font-family: "Archivo Black", "Bricolage Grotesque", sans-serif;
+}
+
+.font-poster {
+  font-family: "Bricolage Grotesque", "Archivo Black", sans-serif;
+}
+
+/* soft dotted grain texture for cream / light sections */
+.grain-cream {
+  background-color: var(--cream);
+  background-image: radial-gradient(rgba(6, 59, 42, 0.09) 1.4px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+
+/* deep jungle texture for dark sections */
+.grain-jungle {
+  background-color: var(--deep-jungle);
+  background-image: radial-gradient(rgba(183, 240, 0, 0.08) 1.4px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+
+/* hand-drawn style dashed border ring */
+.hand-ring {
+  border: 2.5px dashed currentColor;
+  border-radius: 9999px;
+}
+
+.sticker {
+  box-shadow: 0 6px 0 rgba(6, 59, 42, 0.25);
+}
+
+.sticker-tilt-left {
+  transform: rotate(-6deg);
+}
+
+.sticker-tilt-right {
+  transform: rotate(6deg);
+}
+
+/* subtle diagonal stripe accent used on the builder pass */
+.stripe-accent {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--sun) 0px,
+    var(--sun) 10px,
+    var(--pink) 10px,
+    var(--pink) 20px
+  );
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--r, 0deg)); }
+}
+
+.float-slow {
+  animation: float-slow 5s ease-in-out infinite;
+}
