@@ -1,24 +1,63 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 
+function isHeic(file) {
+  const type = file?.type?.toLowerCase() || "";
+  const name = file?.name?.toLowerCase() || "";
+  return (
+    type === "image/heic" ||
+    type === "image/heif" ||
+    name.endsWith(".heic") ||
+    name.endsWith(".heif")
+  );
+}
+
 export default function UploadBox({ builder, setBuilder }) {
   const [uploadError, setUploadError] = useState("");
+  const [isConverting, setIsConverting] = useState(false);
 
-  const onDrop = (acceptedFiles, fileRejections) => {
+  const onDrop = async (acceptedFiles, fileRejections) => {
     setUploadError("");
 
     if (fileRejections?.length) {
-      setUploadError("That file type isn't supported. Please use JPG or PNG.");
+      setUploadError("That file type isn't supported. Please use JPG, PNG, or HEIC.");
       return;
     }
 
     const file = acceptedFiles[0];
     if (!file) return;
 
-    if (file.type === "image/heic" || file.type === "image/heif" || /\.heic$/i.test(file.name || "")) {
-      setUploadError(
-        "HEIC photos can look broken in some browsers — JPG or PNG is recommended."
-      );
+    if (isHeic(file)) {
+      setIsConverting(true);
+      try {
+        const heic2any = (await import("heic2any")).default;
+        const converted = await heic2any({
+          blob: file,
+          toType: "image/jpeg",
+          quality: 0.9,
+        });
+
+        const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+        const jpegFile = new File(
+          [jpegBlob],
+          file.name.replace(/\.(heic|heif)$/i, ".jpg"),
+          { type: "image/jpeg" }
+        );
+
+        setBuilder((prev) => ({
+          ...prev,
+          image: URL.createObjectURL(jpegFile),
+          imageFile: jpegFile,
+        }));
+      } catch (err) {
+        console.error("HEIC conversion failed:", err);
+        setUploadError(
+          "We couldn't convert that HEIC photo. Please try a JPG or PNG instead."
+        );
+      } finally {
+        setIsConverting(false);
+      }
+      return;
     }
 
     setBuilder((prev) => ({
@@ -58,7 +97,14 @@ export default function UploadBox({ builder, setBuilder }) {
       >
         <input {...getInputProps()} aria-label="Builder photo file input" />
 
-        {builder?.image ? (
+        {isConverting ? (
+          <>
+            <p className="text-5xl">🔄</p>
+            <h3 className="font-display mt-3 text-base text-[#063B2A]">
+              CONVERTING YOUR PHOTO...
+            </h3>
+          </>
+        ) : builder?.image ? (
           <img
             src={builder.image}
             alt="Your uploaded builder photo"

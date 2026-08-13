@@ -20,11 +20,15 @@ export default function PassActions({ passRef, builder }) {
 
     setDownloadState("downloading");
     try {
+      if (document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+
       const dataUrl = await toPng(passRef.current, {
         pixelRatio: 2,
         cacheBust: true,
       });
-
+      
       const link = document.createElement("a");
       const filename = builder?.name
         ? `frameingoa-${slugify(builder.name)}.png`
@@ -53,7 +57,7 @@ export default function PassActions({ passRef, builder }) {
   };
 
   const handleShareOnX = () => {
-    const text = `I just built my Hacker House Goa Builder identity \u26a1\n\nMeet me at Hacker House Goa.\n\n${shareUrl}`;
+    const text = `I just built my Hacker House Goa Builder identity \u26a1\n\nMeet me at Hacker House Goa.\n\n${shareUrl}\n\n#FrameInGoa`;
     const intentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       text
     )}`;
