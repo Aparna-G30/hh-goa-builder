@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { heicTo, isHeic } from "heic-to";
 
-function isHeic(file) {
+function isHeicFile(file) {
   const type = file?.type?.toLowerCase() || "";
   const name = file?.name?.toLowerCase() || "";
+
   return (
     type === "image/heic" ||
     type === "image/heif" ||
@@ -19,47 +21,74 @@ export default function UploadBox({ builder, setBuilder }) {
   const onDrop = async (acceptedFiles, fileRejections) => {
     setUploadError("");
 
-    if (fileRejections?.length) {
-      setUploadError("That file type isn't supported. Please use JPG, PNG, or HEIC.");
-      return;
-    }
-
+    // Important:
+    // Some browsers report HEIC files with an empty/incorrect MIME type.
+    // So we check the filename as well.
     const file = acceptedFiles[0];
-    if (!file) return;
 
-    if (isHeic(file)) {
-      setIsConverting(true);
-      try {
-        const heic2any = (await import("heic2any")).default;
-        const converted = await heic2any({
-          blob: file,
-          toType: "image/jpeg",
-          quality: 0.9,
-        });
-
-        const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
-        const jpegFile = new File(
-          [jpegBlob],
-          file.name.replace(/\.(heic|heif)$/i, ".jpg"),
-          { type: "image/jpeg" }
-        );
-
-        setBuilder((prev) => ({
-          ...prev,
-          image: URL.createObjectURL(jpegFile),
-          imageFile: jpegFile,
-        }));
-      } catch (err) {
-        console.error("HEIC conversion failed:", err);
+    if (!file) {
+      if (fileRejections?.length) {
         setUploadError(
-          "We couldn't convert that HEIC photo. Please try a JPG or PNG instead."
+          "That file type isn't supported. Please use JPG, PNG, or HEIC."
         );
-      } finally {
-        setIsConverting(false);
       }
       return;
     }
 
+    const heic = isHeicFile(file);
+
+    if (heic) {
+      setIsConverting(true);
+
+      try {
+        console.log("HEIC detected:", {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+        });
+
+        const converted = await heicTo({
+          blob: file,
+          type: "image/jpeg",
+          quality: 0.9,
+        });
+
+        const jpegBlob =
+          converted instanceof Blob
+            ? converted
+            : new Blob([converted], { type: "image/jpeg" });
+
+        const jpegFile = new File(
+          [jpegBlob],
+          file.name.replace(/\.(heic|heif)$/i, ".jpg"),
+          {
+            type: "image/jpeg",
+          }
+        );
+
+        const previewUrl = URL.createObjectURL(jpegFile);
+
+        setBuilder((prev) => ({
+          ...prev,
+          image: previewUrl,
+          imageFile: jpegFile,
+        }));
+
+        console.log("HEIC successfully converted to JPEG");
+      } catch (error) {
+        console.error("HEIC conversion failed:", error);
+
+        setUploadError(
+          "We couldn't read this HEIC photo. Please try another HEIC/JPG/PNG image."
+        );
+      } finally {
+        setIsConverting(false);
+      }
+
+      return;
+    }
+
+    // Normal JPG/PNG upload
     setBuilder((prev) => ({
       ...prev,
       image: URL.createObjectURL(file),
@@ -69,11 +98,38 @@ export default function UploadBox({ builder, setBuilder }) {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      "image/jpeg": [],
-      "image/png": [],
-      "image/heic": [],
-      "image/heif": [],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+
+      // Keep these so browsers that correctly identify HEIC
+      // can still show them as accepted.
+      "image/heic": [".heic"],
+      "image/heif": [".heif"],
     },
+
+    // Very important:
+    // react-dropzone can reject HEIC before our conversion code runs
+    // when the browser reports an unusual MIME type.
+    validator: (file) => {
+      if (isHeicFile(file)) {
+        return null;
+      }
+
+      const allowed =
+        file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        /\.(jpg|jpeg|png)$/i.test(file.name);
+
+      if (allowed) {
+        return null;
+      }
+
+      return {
+        code: "file-invalid-type",
+        message: "Only JPG, PNG, and HEIC files are supported.",
+      };
+    },
+
     multiple: false,
     onDrop,
   });
@@ -95,14 +151,22 @@ export default function UploadBox({ builder, setBuilder }) {
             : "border-[#087F4F]/50 bg-[#FFF4D6] hover:border-[#FFD83D] hover:bg-[#FFD83D]/10"
         }`}
       >
-        <input {...getInputProps()} aria-label="Builder photo file input" />
+        <input
+          {...getInputProps()}
+          aria-label="Builder photo file input"
+        />
 
         {isConverting ? (
           <>
             <p className="text-5xl">🔄</p>
+
             <h3 className="font-display mt-3 text-base text-[#063B2A]">
-              CONVERTING YOUR PHOTO...
+              CONVERTING YOUR HEIC...
             </h3>
+
+            <p className="mt-2 text-sm text-[#111111]/60">
+              Give us a second ✨
+            </p>
           </>
         ) : builder?.image ? (
           <img
@@ -113,12 +177,15 @@ export default function UploadBox({ builder, setBuilder }) {
         ) : (
           <>
             <p className="text-5xl">📸</p>
+
             <h3 className="font-display mt-3 text-base text-[#063B2A]">
               DROP YOUR BUILDER PHOTO
             </h3>
+
             <p className="mt-1 text-sm text-[#111111]/60">
               drag &amp; drop or click to browse
             </p>
+
             <p className="mt-2 text-[11px] font-bold tracking-widest text-[#087F4F]">
               JPG • PNG • HEIC
             </p>
