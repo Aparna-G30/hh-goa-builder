@@ -21,9 +21,6 @@ export default function UploadBox({ builder, setBuilder }) {
   const onDrop = async (acceptedFiles, fileRejections) => {
     setUploadError("");
 
-    // Important:
-    // Some browsers report HEIC files with an empty/incorrect MIME type.
-    // So we check the filename as well.
     const file = acceptedFiles[0];
 
     if (!file) {
@@ -100,16 +97,10 @@ export default function UploadBox({ builder, setBuilder }) {
     accept: {
       "image/jpeg": [".jpg", ".jpeg"],
       "image/png": [".png"],
-
-      // Keep these so browsers that correctly identify HEIC
-      // can still show them as accepted.
       "image/heic": [".heic"],
       "image/heif": [".heif"],
     },
 
-    // Very important:
-    // react-dropzone can reject HEIC before our conversion code runs
-    // when the browser reports an unusual MIME type.
     validator: (file) => {
       if (isHeicFile(file)) {
         return null;

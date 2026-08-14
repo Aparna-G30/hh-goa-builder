@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 :root{
-  /* Tropical palette */
   --deep-jungle:#063B2A;
   --jungle:#087F4F;
   --bright-green:#39D353;
@@ -39,21 +38,18 @@ body {
   font-family: "Bricolage Grotesque", "Archivo Black", sans-serif;
 }
 
-/* soft dotted grain texture for cream / light sections */
 .grain-cream {
   background-color: var(--cream);
   background-image: radial-gradient(rgba(6, 59, 42, 0.09) 1.4px, transparent 1.4px);
   background-size: 22px 22px;
 }
 
-/* deep jungle texture for dark sections */
 .grain-jungle {
   background-color: var(--deep-jungle);
   background-image: radial-gradient(rgba(183, 240, 0, 0.08) 1.4px, transparent 1.4px);
   background-size: 22px 22px;
 }
 
-/* hand-drawn style dashed border ring */
 .hand-ring {
   border: 2.5px dashed currentColor;
   border-radius: 9999px;
@@ -71,7 +67,6 @@ body {
   transform: rotate(6deg);
 }
 
-/* subtle diagonal stripe accent used on the builder pass */
 .stripe-accent {
   background: repeating-linear-gradient(
     -45deg,

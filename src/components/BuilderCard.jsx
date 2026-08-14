@@ -6,10 +6,6 @@ const SIZE_CLASSES = {
   large: "w-[360px] sm:w-[440px]",
 };
 
-// The rotation/hover-tilt lives on this OUTER wrapper only. The ref goes on
-// the INNER, unrotated node — html-to-image clones just that node's
-// subtree when capturing, so a parent's CSS transform (the tilt) never
-// gets baked into the downloaded image.
 const BuilderCard = forwardRef(function BuilderCard(
   { builder, size = "default" },
   ref
